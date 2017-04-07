@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             status = API_USER_NOT_EXIST;
         } else {
-            if (!MD5Util.MD5(password).equals(user.getPassword()))
+            if (!MD5Util.md5(password).equals(user.getPassword()))
                 status = API_USER_PASSWORD_ERROR;
         }
         // 返回APIResponse对象，配合@ResponseBody转为Json
