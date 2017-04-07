@@ -89,6 +89,7 @@
             <version>2.2</version>
             <scope>provided</scope>
         </dependency>
+
         <!-- jackson -->
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
@@ -129,13 +130,6 @@
             <artifactId>c3p0</artifactId>
             <version>0.9.1.2</version>
             <type>jar</type>
-        </dependency>
-
-        <!-- gson -->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.3.1</version>
         </dependency>
 
         <!-- apache commons upload -->

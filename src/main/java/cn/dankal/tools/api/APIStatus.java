@@ -6,7 +6,7 @@ package cn.dankal.tools.api;
 public enum APIStatus {
 
     API_SUCCESS("00001", "success"),
-    API_PASSWORD_ERROR("00002", "用户名密码错误"),
+    API_USER_PASSWORD_ERROR("00002", "用户名密码错误"),
     API_USER_NOT_EXIST("00003", "用户名不存在");
 
     private String state;

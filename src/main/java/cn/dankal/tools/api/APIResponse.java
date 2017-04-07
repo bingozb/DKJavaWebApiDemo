@@ -7,16 +7,9 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
  */
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class APIResponse {
-    String state;
-    String message;
-    Object result;
-
-    APIResponse(String state, String message, Object result) {
-        super();
-        this.state = state;
-        this.message = message;
-        this.result = result;
-    }
+    private String state;
+    private String message;
+    private Object result;
 
     public String getState() {
         return state;
