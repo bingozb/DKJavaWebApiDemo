@@ -1,7 +1,7 @@
 package cn.dankal.tools.api;
 
 /**
- * API错误枚举
+ * API状态枚举
  */
 public enum APIStatus {
 

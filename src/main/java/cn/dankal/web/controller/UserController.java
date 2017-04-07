@@ -20,13 +20,13 @@ public class UserController {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST, headers = "api-version=1")
     public @ResponseBody
-    APIResponse login(HttpServletRequest request, HttpServletResponse response) {
+    APIResponse login(HttpServletRequest request) {
         return userService.login(request);
     }
 
     @RequestMapping(value = "/query", method = RequestMethod.GET, headers = "api-version=1")
     public @ResponseBody
-    APIResponse query(HttpServletRequest request, HttpServletResponse response) {
+    APIResponse query() {
         return userService.allUsers();
     }
 }
