@@ -54,7 +54,7 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
-    <!-- 定义个通知，指定事务管理器 -->
+    <!-- 定义通知，指定事务管理器 -->
     <tx:advice id="txAdvice" transaction-manager="txManager">
         <tx:attributes>
             <tx:method name="delete*" propagation="REQUIRED" read-only="false"
@@ -74,7 +74,7 @@
     </tx:advice>
 
     <aop:config>
-        <!-- 配置一个切入点 -->
+        <!-- 配置切入点 -->
         <aop:pointcut id="serviceMethods"
                       expression="execution(* cn.dankal.web.service.impl.*ServiceImpl.*(..))"/>
         <aop:advisor advice-ref="txAdvice" pointcut-ref="serviceMethods"/>

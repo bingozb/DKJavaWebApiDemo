@@ -6,11 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="JSPApiDemo" />
+        <module name="DKJavaWebApiDemo" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="JSPApiDemo" target="1.5" />
+      <module name="DKJavaWebApiDemo" target="1.5" />
     </bytecodeTargetLevel>
   </component>
 </project>

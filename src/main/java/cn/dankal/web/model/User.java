@@ -77,10 +77,4 @@ public class User implements Serializable {
     public void setCreate_time(String create_time) {
         this.create_time = create_time;
     }
-
-    @Override
-    public String toString() {
-        return "User [id=" + id + ", username=" + username + ", password=" + password + ", enable=" + enable + ", role="
-                + role + ", last_time=" + last_time + ", create_time=" + create_time + "]";
-    }
 }

@@ -1,17 +1,15 @@
 package cn.dankal.web.service;
 
-import cn.dankal.tools.api.APIStatus;
-import cn.dankal.web.model.User;
 import cn.dankal.tools.api.*;
 
-import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 
 public interface UserService {
 
     /**
      * 登录
      */
-    APIResponse login(User user);
+    APIResponse login(HttpServletRequest request);
 
     /**
      * 获取所有用户

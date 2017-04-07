@@ -1,6 +1,7 @@
 package cn.dankal.web.service.impl;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 import cn.dankal.tools.api.APIResponse;
 import cn.dankal.tools.api.APIUtil;
@@ -25,7 +26,8 @@ public class UserServiceImpl implements UserService {
     @Resource
     private UserMapper mapper;
 
-    public APIResponse login(User user) {
+    public APIResponse login(HttpServletRequest request) {
+        User user = new User(request.getParameter("username"), request.getParameter("password"));
         String password = MD5Util.MD5(user.getPassword());
         user = mapper.selectUserByUsername(user.getUsername());
         APIStatus status = API_SUCCESS;

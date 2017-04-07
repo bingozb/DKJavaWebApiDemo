@@ -3,7 +3,7 @@ package cn.dankal.tools.api;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
- * Http响应实体类
+ * API响应实体类
  */
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class APIResponse {
@@ -51,7 +51,8 @@ public class APIResponse {
         return APIResponseHolder.instance;
     }
 
-    private APIResponse() {}
+    private APIResponse() {
+    }
 
     private static class APIResponseHolder {
         private final static APIResponse instance = new APIResponse();

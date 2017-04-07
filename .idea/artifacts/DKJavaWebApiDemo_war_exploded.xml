@@ -1,10 +1,10 @@
 <component name="ArtifactManager">
-  <artifact type="exploded-war" name="JSPApiDemo:war exploded">
-    <output-path>$PROJECT_DIR$/target/JavaWebApiDemo-1.0-SNAPSHOT</output-path>
+  <artifact type="exploded-war" name="DKJavaWebApiDemo:war exploded">
+    <output-path>$PROJECT_DIR$/target/DKJavaWebApiDemo-1.0-SNAPSHOT</output-path>
     <root id="root">
       <element id="directory" name="WEB-INF">
         <element id="directory" name="classes">
-          <element id="module-output" name="JavaWebApiDemo" />
+          <element id="module-output" name="DKJavaWebApiDemo" />
         </element>
         <element id="directory" name="lib">
           <element id="library" level="project" name="Maven: org.springframework:spring-webmvc:4.1.4.RELEASE" />
@@ -35,9 +35,9 @@
         </element>
       </element>
       <element id="directory" name="META-INF">
-        <element id="file-copy" path="$PROJECT_DIR$/target/JavaWebApiDemo-1.0-SNAPSHOT/META-INF/MANIFEST.MF" />
+        <element id="file-copy" path="$PROJECT_DIR$/target/DKJavaWebApiDemo-1.0-SNAPSHOT/META-INF/MANIFEST.MF" />
       </element>
-      <element id="javaee-facet-resources" facet="JavaWebApiDemo/web/Web" />
+      <element id="javaee-facet-resources" facet="DKJavaWebApiDemo/web/Web" />
     </root>
   </artifact>
 </component>
