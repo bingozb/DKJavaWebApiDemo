@@ -1,9 +1,11 @@
 # DKJavaWebApiDemo
-个人 JavaWeb 写 API 的实现设计，Maven 管理依赖，框架为 SSM。使用 Spring 的 Jackson 把 POJO 转为 JSON。
+个人 JavaWeb 写 API 的实现设计，Maven 管理依赖，框架为 Spring 4.1.4 + SpringMVC 4.1.4 + Mybatis 3.4.1，序列化使用 Gson 2.8。
 
 ## 前言
 
 当后台项目使用 JavaWeb 进行开发时，写接口就成为一门艺术活。无论是后台管理系统的前后端分离、还是要给移动端提供数据，返回方便、规范的数据及其重要。掌握以后，你肯定会爱不释手。有一年以上 Java 开发经验的人，相信不会再选择 PHP、Nodejs 等来写接口，原因只能意会，不可言传。
+
+<!-- more -->
 
 ## 规定与约束
 
@@ -17,24 +19,24 @@
 
 - 架构：MMCS（Mapper、Model、Controller、Service）
 
-    - mapper 是对象持久化映射层，使用 mybatis 进行数据库交互;
-    - controller 是控制层，相当于 MVC 的 C层;
-    - model 是数据模型层相当于 MVC 的 M层，存放 POJO 类;
-    - servive 是一些业务逻辑的处理层;
+    - Mapper 是对象持久化映射层，使用 Mybatis 进行数据库交互
+    - Model 是数据模型层相当于 MVC 的 M层，存放 POJO 类
+    - Controller 是控制层，相当于 MVC 的 C层
+    - Servive 是一些业务逻辑的处理层
     
 ## 核心配置
 
 三大框架的整合网上例子很多，这里只阐述针对写 API 的核心点。
 
-### 依赖 Jackson
+### 依赖 Gson
 
-pom.xml 添加 jackson 依赖
+pom.xml 添加 Gson 依赖
 
 ```xml
 <dependency>
-    <groupId>org.codehaus.jackson</groupId>
-    <artifactId>jackson-mapper-asl</artifactId>
-    <version>1.9.13</version>
+    <groupId>com.google.code.gson</groupId>
+    <artifactId>gson</artifactId>
+    <version>2.8.0</version>
 </dependency>
 ```
 
@@ -46,10 +48,9 @@ pom.xml 添加 jackson 依赖
 ```xml
 <mvc:annotation-driven/>
 ```
+由于 JSON 需要配置 AnnotationMethodHandlerAdapter 和合适的 HttpMessageConverter，Spring 4.1 提供了 Gson 的 HttpMessageConverter，设置此标签后，并且已经依赖了 Gson，就已经完成了 JSON 的配置。
 
-添加这个标签相当于注册了 DefaultAnnotationHandlerMapping 和 AnnotationMethodHandlerAdapter 两个 bean，配置一些 messageconverter，解决了 @Controller 注解的使用前提配置。
-
-由于 JSON 需要配置 AnnotationMethodHandlerAdapter 和 MappingJacksonHttpMessageConverter，设置此标签后，就不需要再配置了。
+相当于注册了 DefaultAnnotationHandlerMapping 和 AnnotationMethodHandlerAdapter 两个 bean，配置一些 messageConverter 为 GsonHttpMessageConverter，解决了 @Controller 注解的使用前提配置。
 
 #### 删除视图解析器
 
@@ -134,11 +135,12 @@ public enum APIStatus {
 
 #### APIResponse
 
+把 API 响应数据封装为实体类，并提供了单例对象的获取方法。
+
 ```java
 /**
  * API响应实体类
  */
-@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class APIResponse {
     private String state;
     private String message;
@@ -185,8 +187,6 @@ public class APIResponse {
 }
 ```
 
-@JsonSerialize 注解用于属性或者 getter 方法上，用于在序列化时嵌入我们自定义的代码。这里设置 APIResponse 对象转为 Json 时不包含空值，也就是不会出现值为 null 的键值对。
-
 #### APIUtil
 
 ```java
@@ -210,6 +210,40 @@ public class APIUtil {
 
         return response;
     }
+}
+```
+
+APIUtil 作为工具类，原本我封装了 Gson 的相关方法，但后来使用 Spring 的 @ResponseBody 就只需要返回一个 POJO 了，所以，该工具类暂时只提供一个方法。
+
+值得一提的是，返回的 APIResponse 是一个单例对象，虽然 Java 有垃圾自动回收机制，但我个人还是觉得没有必要每个 API 请求都 new 一个 APIResponse 来转换 JSON，用单例会比较合适。
+
+### Model层设计
+
+与普通的 POJO 类一样，包含了数据库表对应的字段，值得一提的是 `transient` 这个关键字，是 Gson 中过滤序列化/反序列化的一种方法。
+
+例如，用户的密码在登录的 API 不参与序列化，可以给 `password` 这个属性添加 `transient` 关键字。
+
+```
+public class User {
+    private Integer id;
+    private String username;
+    private transient String password;
+    private Boolean enable;
+    private String role;
+    private String last_time;
+    private String create_time;
+
+    public User() {
+        super();
+    }
+
+    public User(String username, String password) {
+        super();
+        this.username = username;
+        this.password = password;
+    }
+
+    // getters and setters ...
 }
 ```
 
@@ -322,10 +356,28 @@ public class UserController {
 
 其中，@RequestMapping 除了绑定路由，headers 还规定一定要有 `api-version=1`（参考） 这对键值对，这是接口的版本控制，在迭代开发中是非常重要的。
 
-方法的返回值为 APIResponse，要加上注解 `@ResponseBody`，作用是将返回的对象作为 HTTP 响应正文返回，并调用适合 HttpMessageConverter 的 Adapter 转换对象，写入输出流。由于前面已经配置了`<mvc:annotation-driven />`，就由 Spring 指定了 Converter 为 MappingJacksonHttpMessageConverter，所以需要依赖 Jackson 就是这个原因。
+方法的返回值为 APIResponse，要加上注解 `@ResponseBody`，作用是将返回的对象作为 HTTP 响应正文返回，并调用 GsonHttpMessageConverter 这个适配器转换对象写入输出流。
 
 ## 效果
 
 至此，整套写 API 的框架就整合配置完成了，测试效果符合预期。
 
-![Demo](https://github.com/bingozb/DKJavaWebApiDemo/blob/master/demo.jpg)
+```json
+{
+    "state": "00001", 
+    "message": "success", 
+    "result": {
+        "id": 1, 
+        "username": "bingo", 
+        "enable": true, 
+        "role": "管理员", 
+        "last_time": "1483673751744", 
+        "create_time": "1483082840732"
+    }
+}
+```
+
+
+## 后话
+
+Demo 源码已经托管到 [GitHub-DKJavaWebApiDemo](https://github.com/bingozb/DKJavaWebApiDemo)，遵循 MIT 开源协议。一方面作为个人的战斗记录，另一方面，也准备为公司的后台开创一个 JavaWeb 组，这是我今年的计划，还在评估阶段。

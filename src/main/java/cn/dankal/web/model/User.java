@@ -1,12 +1,9 @@
 package cn.dankal.web.model;
 
-import java.io.Serializable;
-
-public class User implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class User {
     private Integer id;
     private String username;
-    private String password;
+    private transient String password;
     private Boolean enable;
     private String role;
     private String last_time;

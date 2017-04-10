@@ -1,11 +1,8 @@
 package cn.dankal.tools.api;
 
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-
 /**
  * API响应实体类
  */
-@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class APIResponse {
     private String state;
     private String message;
