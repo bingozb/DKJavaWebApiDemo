@@ -223,7 +223,7 @@ APIUtil 作为工具类，原本我封装了 Gson 的相关方法，但后来使
 
 例如，用户的密码在登录的 API 不参与序列化，可以给 `password` 这个属性添加 `transient` 关键字。
 
-```
+```java
 public class User {
     private Integer id;
     private String username;

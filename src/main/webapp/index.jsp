@@ -1,5 +1,8 @@
 <html>
+<head>
+    <title>Dankal JavaWeb API Demo.</title>
+</head>
 <body>
-<h2>Hello World!</h2>
+<h2>Dankal JavaWeb API Demo.</h2>
 </body>
 </html>
