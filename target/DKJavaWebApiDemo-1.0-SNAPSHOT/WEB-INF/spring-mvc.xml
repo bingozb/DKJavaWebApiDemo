@@ -19,4 +19,16 @@
         <context:include-filter type="annotation"
                                 expression="org.springframework.stereotype.Controller"/>
     </context:component-scan>
+
+    <!-- 文件上传配置 -->
+    <bean id="multipartResolver"
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 默认编码 -->
+        <property name="defaultEncoding" value="UTF-8"/>
+        <!-- 指定所上传文件的总大小。注意maxUploadSize属性的限制不是针对单个文件，而是所有文件的容量之和 设置10000M 10000*1024*1024 -->
+        <property name="maxUploadSize" value="10485760000"/>
+        <!-- 最大内存大小 -->
+        <property name="maxInMemorySize" value="40960"/>
+    </bean>
+
 </beans>

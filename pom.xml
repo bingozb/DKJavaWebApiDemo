@@ -10,9 +10,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <junit.version>4.11</junit.version>
         <spring.version>4.1.4.RELEASE</spring.version>
         <mybatis.version>3.4.1</mybatis.version>
-        <junit.version>4.11</junit.version>
         <mysql.version>5.1.30</mysql.version>
         <log4j.version>1.2.17</log4j.version>
         <jackson.version>1.9.13</jackson.version>
@@ -69,14 +69,14 @@
             <version>${spring.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- springMVC -->
+        <!-- spring MVC -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
             <version>${spring.version}</version>
         </dependency>
 
-        <!-- gson -->
+        <!-- Gson -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -93,12 +93,6 @@
             <groupId>aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
             <version>1.5.4</version>
-        </dependency>
-
-        <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
-            <version>7.0</version>
         </dependency>
 
         <!-- mybatis -->
@@ -120,6 +114,12 @@
             <version>${mysql.version}</version>
         </dependency>
 
+        <!-- 添加数据库连接池依赖 -->
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.2.2</version>
+        </dependency>
         <!-- apache commons upload -->
         <dependency>
             <groupId>commons-io</groupId>
@@ -135,11 +135,6 @@
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.9</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-dbcp</groupId>
-            <artifactId>commons-dbcp</artifactId>
-            <version>1.2.2</version>
         </dependency>
 
         <!-- jstl -->
@@ -159,6 +154,12 @@
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>${log4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <version>7.0</version>
         </dependency>
     </dependencies>
 

@@ -3,6 +3,7 @@ package cn.dankal.web.service.impl;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import cn.dankal.tools.api.APIRequest;
 import cn.dankal.tools.api.APIResponse;
 import cn.dankal.tools.api.APIUtil;
 import org.springframework.stereotype.Service;
@@ -26,13 +27,12 @@ public class UserServiceImpl implements UserService {
     @Resource
     private UserMapper mapper;
 
-    public APIResponse login(HttpServletRequest request) {
+    public APIResponse login(APIRequest request) {
         // 获取请求参数
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
+        String username = (String)request.getParameter("username");
+        String password = (String)request.getParameter("password");
         // 处理业务逻辑
-        User user = new User(username, password);
-        user = mapper.selectUserByUsername(user.getUsername());
+        User user = mapper.selectUserByUsername(username);
         APIStatus status = API_SUCCESS;
         if (user == null) {
             status = API_USER_NOT_EXIST;

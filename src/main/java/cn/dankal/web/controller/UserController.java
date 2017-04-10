@@ -1,5 +1,6 @@
 package cn.dankal.web.controller;
 
+import cn.dankal.tools.api.APIRequest;
 import cn.dankal.tools.api.APIResponse;
 import cn.dankal.web.service.UserService;
 import org.springframework.stereotype.Controller;
@@ -20,7 +21,7 @@ public class UserController {
     @RequestMapping(value = "/login", method = RequestMethod.POST, headers = "api-version=1")
     public @ResponseBody
     APIResponse login(HttpServletRequest request) {
-        return userService.login(request);
+        return userService.login(new APIRequest(request));
     }
 
     @RequestMapping(value = "/query", method = RequestMethod.GET, headers = "api-version=1")
