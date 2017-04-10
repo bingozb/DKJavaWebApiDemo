@@ -42,7 +42,7 @@ pom.xml 添加 Gson 依赖
 
 ### Spring MVC 配置
 
-修改 springmvc 的配置文件，对应 Demo 中的 springmvc-servlet.xml。
+修改 SpringMVC 的配置文件，对应 Demo 中的 spring-mvc.xml。
 
 #### 开启注解模式驱动
 ```xml
@@ -58,7 +58,7 @@ pom.xml 添加 Gson 依赖
 
 ```xml
 <bean  
-   class="org.springframework.web.servlet.view.UrlBasedViewResolver">  
+   class="org.springframework.web.servlet.view.InternalResourceViewResolver">  
    <property name="suffix" value=".jsp" />  
    ... 
 </bean> 
@@ -131,6 +131,135 @@ public enum APIStatus {
     }
 }
 
+```
+
+#### APIRequest
+
+APIRequest 对 HttpServletRequest 进行封装，提供常用的属性包括请求的URL、请求参数等。如果提供的属性不能满足需求，还提供了原 HttpServletRequest 对象属性 request。
+
+```java
+/**
+ * API请求实体类
+ */
+public class APIRequest {
+
+    /** Raw Request, 单元测试时为null */
+    private HttpServletRequest request;
+
+    /** 请求头 */
+    private Map<String, Object> header;
+
+    /** 请求参数 */
+    private Map<String, Object> params;
+
+    /** 客户端发出请求时的完整URL */
+    private String url;
+
+    /** 请求行中的资源名部分 */
+    private String uri;
+
+    /** 请求行中的参数部分 */
+    private String queryString;
+
+    /** 请求方法 */
+    private String method;
+
+    /** 请求URL中的额外路径信息。额外路径信息是请求URL中的位于Servlet的路径之后和查询参数之前的内容，以“/”开头 */
+    private String pathInfo;
+
+    /** 发出请求的客户机的IP地址 */
+    private String remoteAddr;
+
+    /** 发出请求的客户机的完整主机名 */
+    private String remoteHost;
+
+    /** 发出请求的客户机的网络端口号 */
+    private int remotePort;
+
+    /** WEB服务器的IP地址 */
+    private String localAddr;
+
+    /** WEB服务器的主机名 */
+    private String localName;
+
+    /** WEB服务器的网络端口号 */
+    private int localPort;
+
+    /** 编码格式 */
+    private String characterEncoding;
+
+    /** 上下文 */
+    private String contextPath;
+
+    public APIRequest() {
+        super();
+    }
+
+    public APIRequest(HttpServletRequest request) {
+
+        this.request = request;
+
+        header = new HashMap<String, Object>();
+        Enumeration e = request.getHeaderNames();
+        while (e.hasMoreElements()) {
+            String name = (String) e.nextElement();
+            Object value = request.getHeader(name);
+            header.put(name, value);
+        }
+
+        params = getParamesMap(request.getParameterMap());
+        url = request.getRequestURL().toString();
+        uri = request.getRequestURI();
+        remoteAddr = request.getRemoteAddr();
+        remoteHost = request.getRemoteHost();
+        remotePort = request.getRemotePort();
+        pathInfo = request.getPathInfo();
+        contextPath = request.getContextPath();
+        localAddr = request.getLocalAddr();
+        characterEncoding = request.getCharacterEncoding();
+        localName = request.getLocalName();
+        localPort = request.getLocalPort();
+        method = request.getMethod();
+        queryString = request.getQueryString();
+    }
+
+    private Map<String, Object> getParamesMap(Map properties) {
+        Map<String, Object> returnMap = new HashMap<String, Object>();
+        Iterator entries = properties.entrySet().iterator();
+        Map.Entry entry;
+        String name = "";
+        String value = "";
+        while (entries.hasNext()) {
+            entry = (Map.Entry) entries.next();
+            name = (String) entry.getKey();
+            Object valueObj = entry.getValue();
+            if (null == valueObj) {
+                value = "";
+            } else if (valueObj instanceof String[]) {
+                String[] values = (String[]) valueObj;
+                for (String v : values) {
+                    value = v + ",";
+                }
+                value = value.substring(0, value.length() - 1);
+            } else {
+                value = valueObj.toString();
+            }
+            returnMap.put(name, value);
+        }
+        return returnMap;
+    }
+
+    public Object getParameter(String s) {
+        return params.get(s);
+    }
+
+    public void setAttribute(String s, Object o) {
+        if (params == null) params = new HashMap<String, Object>();
+        params.put(s, o.toString());
+    }
+
+    // getters and setters ...
+}
 ```
 
 #### APIResponse
@@ -271,7 +400,7 @@ public interface UserMapper {
     Service 层所有的方法统一返回 APIResponse 对象。
 
 - 参数
-    - 当接口请求有传值时，方法的参数为 HttpServletRequest 对象；
+    - 当接口请求有传值时，方法的参数为 APIRequest 对象；
     - 当接口请求不需要传值时，一般为 GET 请求，此时方法不需要参数。
 
 eg.
@@ -282,7 +411,7 @@ public interface UserService {
     /**
      * 登录
      */
-    APIResponse login(HttpServletRequest request);
+    APIResponse login(APIRequest request);
 
     /**
      * 获取所有用户
@@ -302,13 +431,12 @@ public class UserServiceImpl implements UserService {
     @Resource
     private UserMapper mapper;
 
-    public APIResponse login(HttpServletRequest request) {
+    public APIResponse login(APIRequest request) {
         // 获取请求参数
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
+        String username = (String)request.getParameter("username");
+        String password = (String)request.getParameter("password");
         // 处理业务逻辑
-        User user = new User(username, password);
-        user = mapper.selectUserByUsername(user.getUsername());
+        User user = mapper.selectUserByUsername(username);
         APIStatus status = API_SUCCESS;
         if (user == null) {
             status = API_USER_NOT_EXIST;
@@ -343,7 +471,7 @@ public class UserController {
     @RequestMapping(value = "/login", method = RequestMethod.POST, headers = "api-version=1")
     public @ResponseBody
     APIResponse login(HttpServletRequest request) {
-        return userService.login(request);
+        return userService.login(new APIRequest(request));
     }
 
     @RequestMapping(value = "/query", method = RequestMethod.GET, headers = "api-version=1")
@@ -357,6 +485,12 @@ public class UserController {
 其中，@RequestMapping 除了绑定路由，headers 还规定一定要有 `api-version=1`（参考） 这对键值对，这是接口的版本控制，在迭代开发中是非常重要的。
 
 方法的返回值为 APIResponse，要加上注解 `@ResponseBody`，作用是将返回的对象作为 HTTP 响应正文返回，并调用 GsonHttpMessageConverter 这个适配器转换对象写入输出流。
+
+**为什么不直接将 HttpServletRequest 对象传给 Service 层方法呢？**
+
+因为 HttpServletRequest 是接口，SUN 定义了 J2EE 的所有接口，由各个 Application Server 的厂商自己实现。HttpServletRequest 本身并没有构造方法，无法实例化，必须在容器运行环境的情况下才能拿到它。
+
+所以，APIRequest 对 HttpServletRequest 对象进行封装，对其添加构造方法，使得我们可以实例化一个 APIRequest 对象，可以在容器（Tomcat）不运行的情况下可以进行单元测试。
 
 ## 效果
 
@@ -377,7 +511,6 @@ public class UserController {
 }
 ```
 
-
 ## 后话
 
-Demo 源码已经托管到 [GitHub-DKJavaWebApiDemo](https://github.com/bingozb/DKJavaWebApiDemo)，遵循 MIT 开源协议。一方面作为个人的战斗记录，另一方面，也准备为公司的后台开创一个 JavaWeb 组，这是我今年的计划，还在评估阶段。
+Demo 源码已经托管到 [GitHub-DKJavaWebApiDemo](https://github.com/bingozb/DKJavaWebApiDemo)，遵循 MIT 开源协议。一方面作为个人的战斗记录，另一方面，也准备为公司的后台开创一个 JavaWeb 组，这是我今年的计划，还在评估阶段。如果这个设计对您有所帮助，希望能顺手点个 Star，谢谢！

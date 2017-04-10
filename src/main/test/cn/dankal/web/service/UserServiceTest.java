@@ -2,7 +2,6 @@ package cn.dankal.web.service;
 
 import cn.dankal.tools.api.APIRequest;
 import cn.dankal.tools.api.APIResponse;
-import cn.dankal.web.service.impl.UserServiceImpl;
 import com.google.gson.Gson;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
@@ -12,7 +11,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
-import javax.validation.constraints.AssertFalse;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:spring-mybatis.xml"})
