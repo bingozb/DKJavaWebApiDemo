@@ -72,7 +72,7 @@ pom.xml 添加 Gson 依赖
 
 #### 启动自动扫包
 
-```
+```xml
 <context:component-scan base-package="cn.dankal.web">
     <!-- 制定扫包规则,不扫描使用@Service注解的JAVA类 -->
     <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
@@ -97,7 +97,7 @@ pom.xml 添加 Gson 依赖
 
 启动 Aspectj 注解模式驱动 AOP
 
-```
+```xml
 <aop:aspectj-autoproxy proxy-target-class="true"/>
 ```
 
