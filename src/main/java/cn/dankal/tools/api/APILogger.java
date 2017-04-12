@@ -7,12 +7,12 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * API日志管理器
+ * AOP技术 Service层的日志切面
  */
 @Component
 @Aspect
@@ -23,6 +23,7 @@ public class APILogger {
     public void apiPointcut() {
     }
 
+    // 环绕通知
     @Around("apiPointcut()")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
         Object result = null;
@@ -45,13 +46,13 @@ public class APILogger {
         return result;
     }
 
-    //后置返回通知
+    // 后置返回通知
     @AfterReturning(pointcut = "apiPointcut()", argNames = "joinPoint, response", returning = "response")
     public void afterReturn(JoinPoint joinPoint, APIResponse response) {
         logger.info(joinPoint + " Response: " + new Gson().toJson(response) + "\n");
     }
 
-    //抛出异常后通知
+    // 抛出异常后通知
     @AfterThrowing(pointcut = "apiPointcut()", throwing = "ex")
     public void afterThrow(JoinPoint joinPoint, Exception ex) {
         logger.error(joinPoint + " Exception: " + ex.getMessage());

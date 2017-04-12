@@ -77,7 +77,7 @@
     <!-- 事务支持注解 -->
     <tx:annotation-driven transaction-manager="txManager"/>
 
-    <!-- 启动AOP支持 -->
+    <!-- 启动Aspectj注解模式驱动AOP -->
     <aop:aspectj-autoproxy proxy-target-class="true"/>
 
     <aop:config>

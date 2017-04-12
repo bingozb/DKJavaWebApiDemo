@@ -28,7 +28,7 @@
 
 三大框架的整合网上例子很多，这里只阐述针对写 API 的核心点。
 
-### 依赖 Gson
+### 添加依赖
 
 pom.xml 添加 Gson 依赖
 
@@ -40,17 +40,46 @@ pom.xml 添加 Gson 依赖
 </dependency>
 ```
 
+添加 Aspectj 依赖。
+
+```xml
+<!-- AOP -->
+<dependency>
+    <groupId>org.aspectj</groupId>
+    <artifactId>aspectjweaver</artifactId>
+    <version>1.7.4</version>
+</dependency>
+<dependency>
+    <groupId>aspectj</groupId>
+    <artifactId>aspectjrt</artifactId>
+    <version>1.5.4</version>
+</dependency>
+```
+
 ### Spring MVC 配置
 
 修改 SpringMVC 的配置文件，对应 Demo 中的 spring-mvc.xml。
 
 #### 开启注解模式驱动
+
 ```xml
 <mvc:annotation-driven/>
 ```
+
 由于 JSON 需要配置 AnnotationMethodHandlerAdapter 和合适的 HttpMessageConverter，Spring 4.1 提供了 Gson 的 HttpMessageConverter，设置此标签后，并且已经依赖了 Gson，就已经完成了 JSON 的配置。
 
 相当于注册了 DefaultAnnotationHandlerMapping 和 AnnotationMethodHandlerAdapter 两个 bean，配置一些 messageConverter 为 GsonHttpMessageConverter，解决了 @Controller 注解的使用前提配置。
+
+#### 启动自动扫包
+
+```
+<context:component-scan base-package="cn.dankal.web">
+    <!-- 制定扫包规则,不扫描使用@Service注解的JAVA类 -->
+    <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+</context:component-scan>
+```
+
+注意，这里不能扫描`@Service`注解的 Java 类，因为 `spring-mvc.xml` 与 `spring-mybatis.xml` 不是同时加载，如果不进行这样的设置，那么 spring 就会将所有带 `@Service` 注解的类都扫描到容器中，等到加载 `spring-mybatis.xml` 的时候，会因为容器已经存在 Service 类，使得 cglib 不对 Service 进行代理，直接导致的结果就是在 `spring-mybatis.xml` 中的事务配置不起作用，发生异常时，无法对数据进行回滚，在这里也会导致 APILogger 无法正常切入。
 
 #### 删除视图解析器
 
@@ -63,6 +92,18 @@ pom.xml 添加 Gson 依赖
    ... 
 </bean> 
 ```
+
+### Spring 配置
+
+启动 Aspectj 注解模式驱动 AOP
+
+```
+<aop:aspectj-autoproxy proxy-target-class="true"/>
+```
+
+`proxy-target-class="true"` 是强制使用 CGLIB 进行动态代理，如果不添加，则是 JDK 动态代理，反射的效率不是很高。
+
+使用 CGLib 实现动态代理，完全不受代理类必须实现接口的限制，而且 CGLib 底层采用 ASM 字节码生成框架，使用字节码技术生成代理类，比使用 Java 反射效率要高。唯一需要注意的是，CGLib 不能对声明为 final 的方法进行代理，因为 CGLib 原理是动态生成被代理类的子类。
 
 ## 实现设计
 
@@ -164,9 +205,6 @@ public class APIRequest {
     /** 请求方法 */
     private String method;
 
-    /** 请求URL中的额外路径信息。额外路径信息是请求URL中的位于Servlet的路径之后和查询参数之前的内容，以“/”开头 */
-    private String pathInfo;
-
     /** 发出请求的客户机的IP地址 */
     private String remoteAddr;
 
@@ -213,7 +251,6 @@ public class APIRequest {
         remoteAddr = request.getRemoteAddr();
         remoteHost = request.getRemoteHost();
         remotePort = request.getRemotePort();
-        pathInfo = request.getPathInfo();
         contextPath = request.getContextPath();
         localAddr = request.getLocalAddr();
         characterEncoding = request.getCharacterEncoding();
@@ -345,6 +382,68 @@ public class APIUtil {
 APIUtil 作为工具类，原本我封装了 Gson 的相关方法，但后来使用 Spring 的 @ResponseBody 就只需要返回一个 POJO 了，所以，该工具类暂时只提供一个方法。
 
 值得一提的是，返回的 APIResponse 是一个单例对象，虽然 Java 有垃圾自动回收机制，但我个人还是觉得没有必要每个 API 请求都 new 一个 APIResponse 来转换 JSON，用单例会比较合适。
+
+#### APILogger
+
+使用 AOP 技术，编写 Service 层的切面，切点为 `cn.dankal.web.service` 包及子包下的文件。
+
+```java
+/**
+ * API日志管理器
+ * AOP技术 Service层的日志切面
+ */
+@Component
+@Aspect
+public class APILogger {
+    private Logger logger = Logger.getLogger(this.getClass());
+
+    @Pointcut("execution(* cn.dankal.web.service..*(..))")
+    public void apiPointcut() {}
+
+    // 环绕通知
+    @Around("apiPointcut()")
+    public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
+        Object result = null;
+        try {
+            result = joinPoint.proceed();
+            Object obj[] = joinPoint.getArgs();
+            if (obj.length > 0) {
+                APIRequest request = (APIRequest) obj[0];
+                Set set = request.getParams().entrySet();
+                Map.Entry[] entries = (Map.Entry[]) set.toArray(new Map.Entry[set.size()]);
+                for (Map.Entry entry : entries) {
+                    logger.info("[Params] " + entry.getKey() + ":" + entry.getValue());
+                }
+            } else {
+                logger.info("[Params] null");
+            }
+        } catch (Throwable e) {
+            logger.info(joinPoint + " Exception: " + e.getMessage());
+        }
+        return result;
+    }
+
+    // 后置返回通知
+    @AfterReturning(pointcut = "apiPointcut()", argNames = "joinPoint, response", returning = "response")
+    public void afterReturn(JoinPoint joinPoint, APIResponse response) {
+        logger.info(joinPoint + " Response: " + new Gson().toJson(response) + "\n");
+    }
+
+    // 抛出异常后通知
+    @AfterThrowing(pointcut = "apiPointcut()", throwing = "ex")
+    public void afterThrow(JoinPoint joinPoint, Exception ex) {
+        logger.error(joinPoint + " Exception: " + ex.getMessage());
+    }
+}
+```
+
+在环绕通知（@Around）中，将 Service 层的方法的参数进行日志打印。由于已经设计了所有 Service 层的方法的参数都是`无`或者`APIRequest对象`，所以在环绕通知中通过连接点拿到的参数，如果有值，必然为 APIRequest 对象。然后遍历打印它的 params 属性输出请求参数。
+
+在后置返回通知（@AfterReturning）中，将 Service 层的方法的返回值进行日志打印。由于已经设计了所有 Service 层的方法的返回值都是 APIResponse 对象，所以可以直接用 Gson 将其序列化为 Json 字符串并打印输出。
+
+在抛出异常后的通知（@AfterThrowing）中，将连接点和异常进行日志打印。
+
+由此，所有的 Service 层的方法都会在执行后输出日志，包括接口请求的参数和响应的结果 Json，而 Service 层不需要写任何 log 语句。
 
 ### Model层设计
 
@@ -492,24 +591,57 @@ public class UserController {
 
 所以，APIRequest 对 HttpServletRequest 对象进行封装，对其添加构造方法，使得我们可以实例化一个 APIRequest 对象，可以在容器（Tomcat）不运行的情况下可以进行单元测试。
 
+## 单元测试
+
+进行 Service 层的单元测试，跑登录的测试用例，并根据期望结果进行断言。
+
+```java
+@Test
+public void login() throws Exception {
+    // 正常登录
+    APIRequest request = new APIRequest();
+    request.setAttribute("username", "bingo");
+    request.setAttribute("password", "123456");
+    APIResponse response = userService.login(request);
+    Assert.assertTrue(response.getMessage(), response.getState().equals("00001"));
+
+    // 密码错误
+    request.setAttribute("username", "bingo");
+    request.setAttribute("password", "1234567");
+    response = userService.login(request);
+    Assert.assertTrue(response.getMessage(), response.getState().equals("00002"));
+
+    // 用户名不存在
+    request.setAttribute("username", "bingo1");
+    request.setAttribute("password", "123456");
+    response = userService.login(request);
+    Assert.assertTrue(response.getMessage(), response.getState().equals("00003"));
+}
+```
+
+测试通过，结合 APILogger 自动打印输出 API 日志：
+
+```vim
+[INFO][main][2017-04-12 21:15:09][cn.dankal.tools.api.APILogger] - [Params] password:123456
+[INFO][main][2017-04-12 21:15:09][cn.dankal.tools.api.APILogger] - [Params] username:bingo
+[INFO][main][2017-04-12 21:15:09][cn.dankal.tools.api.APILogger] - execution(APIResponse cn.dankal.web.service.impl.UserServiceImpl.login(APIRequest)) Response: {"state":"00001","message":"success","result":{"id":1,"username":"bingo","enable":true,"role":"管理员","last_time":"1483673751744","create_time":"1483082840732"}}
+
+[INFO][main][2017-04-12 21:15:09][cn.dankal.tools.api.APILogger] - [Params] password:1234567
+[INFO][main][2017-04-12 21:15:09][cn.dankal.tools.api.APILogger] - [Params] username:bingo
+[INFO][main][2017-04-12 21:15:09][cn.dankal.tools.api.APILogger] - execution(APIResponse cn.dankal.web.service.impl.UserServiceImpl.login(APIRequest)) Response: {"state":"00002","message":"用户名密码错误"}
+
+[INFO][main][2017-04-12 21:15:09][cn.dankal.tools.api.APILogger] - [Params] password:123456
+[INFO][main][2017-04-12 21:15:09][cn.dankal.tools.api.APILogger] - [Params] username:bingo1
+[INFO][main][2017-04-12 21:15:09][cn.dankal.tools.api.APILogger] - execution(APIResponse cn.dankal.web.service.impl.UserServiceImpl.login(APIRequest)) Response: {"state":"00003","message":"用户名不存在"}
+```
+
+每个接口访问都自动输出了日志，请求参数和结果都一目了然，打印的连接点的信息也包含了 Service 层的 API 信息，基本满足了 API 系统 的日志需求。
+
 ## 效果
 
 至此，整套写 API 的框架就整合配置完成了，测试效果符合预期。
 
-```json
-{
-    "state": "00001", 
-    "message": "success", 
-    "result": {
-        "id": 1, 
-        "username": "bingo", 
-        "enable": true, 
-        "role": "管理员", 
-        "last_time": "1483673751744", 
-        "create_time": "1483082840732"
-    }
-}
-```
+![Demo](https://blog.bingo.ren/images/blog/36/demo.png)
 
 ## 后话
 

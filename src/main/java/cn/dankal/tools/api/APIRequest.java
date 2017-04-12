@@ -11,52 +11,79 @@ import java.util.Map;
  */
 public class APIRequest {
 
-    /** Raw Request, 单元测试时为null */
+    /**
+     * Raw Request, 单元测试时为null
+     */
     private HttpServletRequest request;
 
-    /** 请求头 */
+    /**
+     * 请求头
+     */
     private Map<String, Object> header;
 
-    /** 请求参数 */
+    /**
+     * 请求参数
+     */
     private Map<String, Object> params;
 
-    /** 客户端发出请求时的完整URL */
+    /**
+     * 客户端发出请求时的完整URL
+     */
     private String url;
 
-    /** 请求行中的资源名部分 */
+    /**
+     * 请求行中的资源名部分
+     */
     private String uri;
 
-    /** 请求行中的参数部分 */
+    /**
+     * 请求行中的参数部分
+     */
     private String queryString;
 
-    /** 请求方法 */
+    /**
+     * 请求方法
+     */
     private String method;
 
-    /** 请求URL中的额外路径信息。额外路径信息是请求URL中的位于Servlet的路径之后和查询参数之前的内容，以“/”开头 */
-    private String pathInfo;
-
-    /** 发出请求的客户机的IP地址 */
+    /**
+     * 发出请求的客户机的IP地址
+     */
     private String remoteAddr;
 
-    /** 发出请求的客户机的完整主机名 */
+    /**
+     * 发出请求的客户机的完整主机名
+     */
     private String remoteHost;
 
-    /** 发出请求的客户机的网络端口号 */
+    /**
+     * 发出请求的客户机的网络端口号
+     */
     private int remotePort;
 
-    /** WEB服务器的IP地址 */
+    /**
+     * WEB服务器的IP地址
+     */
     private String localAddr;
 
-    /** WEB服务器的主机名 */
+    /**
+     * WEB服务器的主机名
+     */
     private String localName;
 
-    /** WEB服务器的网络端口号 */
+    /**
+     * WEB服务器的网络端口号
+     */
     private int localPort;
 
-    /** 编码格式 */
+    /**
+     * 编码格式
+     */
     private String characterEncoding;
 
-    /** 上下文 */
+    /**
+     * 上下文
+     */
     private String contextPath;
 
     public APIRequest() {
@@ -81,7 +108,6 @@ public class APIRequest {
         remoteAddr = request.getRemoteAddr();
         remoteHost = request.getRemoteHost();
         remotePort = request.getRemotePort();
-        pathInfo = request.getPathInfo();
         contextPath = request.getContextPath();
         localAddr = request.getLocalAddr();
         characterEncoding = request.getCharacterEncoding();
@@ -180,14 +206,6 @@ public class APIRequest {
 
     public void setMethod(String method) {
         this.method = method;
-    }
-
-    public String getPathInfo() {
-        return pathInfo;
-    }
-
-    public void setPathInfo(String pathInfo) {
-        this.pathInfo = pathInfo;
     }
 
     public String getRemoteAddr() {
