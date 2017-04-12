@@ -641,7 +641,7 @@ public void login() throws Exception {
 
 至此，整套写 API 的框架就整合配置完成了，测试效果符合预期。
 
-![Demo](https://blog.bingo.ren/images/blog/36/demo.png)
+![Demo](https://github.com/bingozb/DKJavaWebApiDemo/tree/master/src/main/webapp/images/demo.png)
 
 ## 后话
 

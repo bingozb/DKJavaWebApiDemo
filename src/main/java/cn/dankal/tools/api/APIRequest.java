@@ -121,7 +121,7 @@ public class APIRequest {
         Map<String, Object> returnMap = new HashMap<String, Object>();
         Iterator entries = properties.entrySet().iterator();
         Map.Entry entry;
-        String name = "";
+        String name;
         String value = "";
         while (entries.hasNext()) {
             entry = (Map.Entry) entries.next();
@@ -160,19 +160,19 @@ public class APIRequest {
         this.request = request;
     }
 
-    public Map getHeader() {
+    public Map<String, Object> getHeader() {
         return header;
     }
 
-    public void setHeader(Map header) {
+    public void setHeader(Map<String, Object> header) {
         this.header = header;
     }
 
-    public Map getParams() {
+    public Map<String, Object> getParams() {
         return params;
     }
 
-    public void setParams(Map params) {
+    public void setParams(Map<String, Object> params) {
         this.params = params;
     }
 
