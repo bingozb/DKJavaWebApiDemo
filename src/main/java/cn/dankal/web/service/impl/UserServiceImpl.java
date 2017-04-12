@@ -1,7 +1,6 @@
 package cn.dankal.web.service.impl;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 
 import cn.dankal.tools.api.APIRequest;
 import cn.dankal.tools.api.APIResponse;
@@ -29,8 +28,8 @@ public class UserServiceImpl implements UserService {
 
     public APIResponse login(APIRequest request) {
         // 获取请求参数
-        String username = (String)request.getParameter("username");
-        String password = (String)request.getParameter("password");
+        String username = (String) request.getParameter("username");
+        String password = (String) request.getParameter("password");
         // 处理业务逻辑
         User user = mapper.selectUserByUsername(username);
         APIStatus status = API_SUCCESS;
