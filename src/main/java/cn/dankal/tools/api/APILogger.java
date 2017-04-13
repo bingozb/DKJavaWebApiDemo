@@ -3,7 +3,6 @@ package cn.dankal.tools.api;
 import com.google.gson.Gson;
 import org.apache.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.springframework.stereotype.Component;
 
@@ -23,27 +22,20 @@ public class APILogger {
     public void apiPointcut() {
     }
 
-    // 环绕通知
-    @Around("apiPointcut()")
-    public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
-        Object result = null;
-        try {
-            result = joinPoint.proceed();
-            Object obj[] = joinPoint.getArgs();
-            if (obj.length > 0) {
-                APIRequest request = (APIRequest) obj[0];
-                Set set = request.getParams().entrySet();
-                Map.Entry[] entries = (Map.Entry[]) set.toArray(new Map.Entry[set.size()]);
-                for (Map.Entry entry : entries) {
-                    logger.info("[Params] " + entry.getKey() + ":" + entry.getValue());
-                }
-            } else {
-                logger.info("[Params] null");
+    // 前置通知
+    @Before("apiPointcut()")
+    public void before(JoinPoint joinPoint) {
+        Object obj[] = joinPoint.getArgs();
+        if (obj.length > 0) {
+            APIRequest request = (APIRequest) obj[0];
+            Set set = request.getParams().entrySet();
+            Map.Entry[] entries = (Map.Entry[]) set.toArray(new Map.Entry[set.size()]);
+            for (Map.Entry entry : entries) {
+                logger.info("[Params] " + entry.getKey() + ":" + entry.getValue());
             }
-        } catch (Throwable e) {
-            logger.info(joinPoint + " Exception: " + e.getMessage());
+        } else {
+            logger.info("[Params] null");
         }
-        return result;
     }
 
     // 后置返回通知

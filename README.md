@@ -400,27 +400,20 @@ public class APILogger {
     @Pointcut("execution(* cn.dankal.web.service..*(..))")
     public void apiPointcut() {}
 
-    // 环绕通知
-    @Around("apiPointcut()")
-    public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
-        Object result = null;
-        try {
-            result = joinPoint.proceed();
-            Object obj[] = joinPoint.getArgs();
-            if (obj.length > 0) {
-                APIRequest request = (APIRequest) obj[0];
-                Set set = request.getParams().entrySet();
-                Map.Entry[] entries = (Map.Entry[]) set.toArray(new Map.Entry[set.size()]);
-                for (Map.Entry entry : entries) {
-                    logger.info("[Params] " + entry.getKey() + ":" + entry.getValue());
-                }
-            } else {
-                logger.info("[Params] null");
+    // 前置通知
+    @Before("apiPointcut()")
+    public void before(JoinPoint joinPoint) {
+        Object obj[] = joinPoint.getArgs();
+        if (obj.length > 0) {
+            APIRequest request = (APIRequest) obj[0];
+            Set set = request.getParams().entrySet();
+            Map.Entry[] entries = (Map.Entry[]) set.toArray(new Map.Entry[set.size()]);
+            for (Map.Entry entry : entries) {
+                logger.info("[Params] " + entry.getKey() + ":" + entry.getValue());
             }
-        } catch (Throwable e) {
-            logger.info(joinPoint + " Exception: " + e.getMessage());
+        } else {
+            logger.info("[Params] null");
         }
-        return result;
     }
 
     // 后置返回通知
@@ -437,7 +430,7 @@ public class APILogger {
 }
 ```
 
-在环绕通知（@Around）中，将 Service 层的方法的参数进行日志打印。由于已经设计了所有 Service 层的方法的参数都是`无`或者`APIRequest对象`，所以在环绕通知中通过连接点拿到的参数，如果有值，必然为 APIRequest 对象。然后遍历打印它的 params 属性输出请求参数。
+在前置通知（@Before）中，将 Service 层的方法的参数进行日志打印。由于已经设计了所有 Service 层的方法的参数都是 `无` 或者 `APIRequest对象`，所以在前置通知中通过连接点拿到的参数，如果有值，必然为 APIRequest 对象，然后遍历打印它的 params 属性输出请求参数。
 
 在后置返回通知（@AfterReturning）中，将 Service 层的方法的返回值进行日志打印。由于已经设计了所有 Service 层的方法的返回值都是 APIResponse 对象，所以可以直接用 Gson 将其序列化为 Json 字符串并打印输出。
 
