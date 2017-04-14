@@ -1,3 +1,5 @@
+[TOC]
+
 # DKJavaWebApiDemo
 个人 JavaWeb 写 API 的实现设计，Maven 管理依赖，框架为 Spring 4.1.4 + SpringMVC 4.1.4 + Mybatis 3.4.1，序列化使用 Gson 2.8。
 
@@ -40,7 +42,7 @@ pom.xml 添加 Gson 依赖
 </dependency>
 ```
 
-添加 Aspectj 依赖。
+添加 Aspectj 依赖
 
 ```xml
 <!-- AOP -->
@@ -68,7 +70,7 @@ pom.xml 添加 Gson 依赖
 
 由于 JSON 需要配置 AnnotationMethodHandlerAdapter 和合适的 HttpMessageConverter，Spring 4.1 提供了 Gson 的 HttpMessageConverter，设置此标签后，并且已经依赖了 Gson，就已经完成了 JSON 的配置。
 
-相当于注册了 DefaultAnnotationHandlerMapping 和 AnnotationMethodHandlerAdapter 两个 bean，配置一些 messageConverter 为 GsonHttpMessageConverter，解决了 @Controller 注解的使用前提配置。
+相当于注册了 DefaultAnnotationHandlerMapping 和 AnnotationMethodHandlerAdapter 两个 bean，配置 messageConverter 为 GsonHttpMessageConverter，解决了 @Controller 注解的使用前提配置。
 
 #### 启动自动扫包
 
@@ -582,7 +584,7 @@ public class UserController {
 
 因为 HttpServletRequest 是接口，SUN 定义了 J2EE 的所有接口，由各个 Application Server 的厂商自己实现。HttpServletRequest 本身并没有构造方法，无法实例化，必须在容器运行环境的情况下才能拿到它。
 
-所以，APIRequest 对 HttpServletRequest 对象进行封装，对其添加构造方法，使得我们可以实例化一个 APIRequest 对象，可以在容器（Tomcat）不运行的情况下可以进行单元测试。
+所以，APIRequest 对 HttpServletRequest 对象进行封装，对其添加构造方法，使得我们可以实例化一个 APIRequest 对象，在容器（Tomcat）不运行的情况下可以进行单元测试。
 
 ## 单元测试
 
