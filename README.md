@@ -1,26 +1,3 @@
-- **DKJavaWebApiDemo 目录**
-    - **前言**
-    - **规定与约束**
-    - **核心配置**
-        - [pom 添加依赖](#pom-)
-        - [Spring MVC 配置](#spring-mvc-)
-        - [Spring 配置](#spring-)
-    - **实现设计**
-        - [Json数据格式规范](#json)
-        - [API工具类封装](#api-)
-            - [APIStatus](#apistatus)
-            - [APIRequest](#apirequest)
-            - [APIResponse](#apiresponse)
-            - [APIUtil](#apiutil)
-            - [APILogger](#apilogger)
-        - [Model层设计](#model-)
-        - [Mapper层设计](#mapper-)
-        - [Service层设计](#service-)
-        - [Controller层设计](#controller-)
-    - **单元测试**
-    - **效果**
-    - **后话**
-
 # DKJavaWebApiDemo
 个人 JavaWeb 写 API 的实现设计，Maven 管理依赖，框架为 Spring 4.1.4 + SpringMVC 4.1.4 + Mybatis 3.4.1，序列化使用 Gson 2.8。
 
@@ -51,7 +28,7 @@
 
 三大框架的整合网上例子很多，这里只阐述针对写 API 的核心点。
 
-### pom 添加依赖
+### 添加依赖
 
 pom.xml 添加 Gson 依赖
 
