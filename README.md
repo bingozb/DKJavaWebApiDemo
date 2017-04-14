@@ -1,4 +1,25 @@
-[TOC]
+- **DKJavaWebApiDemo 目录**
+    - **前言**
+    - **规定与约束**
+    - **核心配置**
+        - [pom 添加依赖](#pom-)
+        - [Spring MVC 配置](#spring-mvc-)
+        - [Spring 配置](#spring-)
+    - **实现设计**
+        - [Json数据格式规范](#json)
+        - [API工具类封装](#api-)
+            - [APIStatus](#apistatus)
+            - [APIRequest](#apirequest)
+            - [APIResponse](#apiresponse)
+            - [APIUtil](#apiutil)
+            - [APILogger](#apilogger)
+        - [Model层设计](#model-)
+        - [Mapper层设计](#mapper-)
+        - [Service层设计](#service-)
+        - [Controller层设计](#controller-)
+    - **单元测试**
+    - **效果**
+    - **后话**
 
 # DKJavaWebApiDemo
 个人 JavaWeb 写 API 的实现设计，Maven 管理依赖，框架为 Spring 4.1.4 + SpringMVC 4.1.4 + Mybatis 3.4.1，序列化使用 Gson 2.8。
@@ -30,7 +51,7 @@
 
 三大框架的整合网上例子很多，这里只阐述针对写 API 的核心点。
 
-### 添加依赖
+### pom 添加依赖
 
 pom.xml 添加 Gson 依赖
 
@@ -438,7 +459,7 @@ public class APILogger {
 
 在抛出异常后的通知（@AfterThrowing）中，将连接点和异常进行日志打印。
 
-由此，所有的 Service 层的方法都会在执行后输出日志，包括接口请求的参数和响应的结果 Json，而 Service 层不需要写任何 log 语句。
+由此，所有的 Service 层的方法都会在执行后输出日志，包括接口请求的参数和响应的结果 JSON，而 Service 层不需要写任何 log 语句。
 
 ### Model层设计
 
@@ -550,7 +571,7 @@ public class UserServiceImpl implements UserService {
 
 ```
 
-### Controller 层设计
+### Controller层设计
 
 基于前面的设计，此时的 Controller 层变得非常轻量级。
 
@@ -640,4 +661,8 @@ public void login() throws Exception {
 
 ## 后话
 
-Demo 源码已经托管到 [GitHub-DKJavaWebApiDemo](https://github.com/bingozb/DKJavaWebApiDemo)，遵循 MIT 开源协议。一方面作为个人的战斗记录，另一方面，也准备为公司的后台开创一个 JavaWeb 组，这是我今年的计划，还在评估阶段。如果这个设计对您有所帮助，希望能顺手点个 Star，谢谢！
+Demo 源码已经托管到 [GitHub-DKJavaWebApiDemo](https://github.com/bingozb/DKJavaWebApiDemo)，遵循 MIT 开源协议。
+
+一方面作为个人的战斗记录，另一方面准备为公司的后台开创一个 JavaWeb 组，这是我今年的计划，还在评估阶段。最后，如果这套设计对您有所帮助，希望能顺手点个 Star，谢谢！
+
+
